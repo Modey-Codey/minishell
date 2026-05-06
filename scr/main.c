@@ -3,32 +3,25 @@
 int	main(void)
 {
 	char	*input;
-	t_token	*tokens;
-	t_cmd	*cmds;
-	t_cmd	*tmp;
+	char	*value;
 	int		i;
+	t_shell	shell;
 
-	while ((input = readline("minishell$ ")))
+	(void)shell;
+
+	while ((input = readline("env_test$ ")))
 	{
-		if (*input)
-			add_history(input);
-		tokens = tokenize(input);
-		cmds = parse(tokens);
-		tmp = cmds;
-		while (tmp)
+		i = 0;
+		while (input[i])
 		{
-			printf("CMD:\n");
-			i = 0;
-			while (tmp->argv && tmp->argv[i])
+			if (input[i] == '$')
 			{
-				printf("arg[%d]: %s\n", i, tmp->argv[i]);
-				i++;
+				value = get_env_value(input, &shell, &i);
+				printf("ENV VALUE: %s\n", value);
+				free(value);
 			}
-			if (tmp->outfile)
-				printf("outfile: %s\n", tmp->outfile);
-			if (tmp->infile)
-				printf("infile: %s\n", tmp->infile);
-			tmp = tmp->next;
+			else
+				i++;
 		}
 		free(input);
 	}
