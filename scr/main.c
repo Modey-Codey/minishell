@@ -1,14 +1,19 @@
 #include "minishell.h"
 
-int	main(void)
+int	main(int argc, char **argv, char **envp)
 {
-	char	*argv[2];
 	t_shell	shell;
+	int		status;
 
-	argv[0] = "exit";
-	argv[1] = NULL;
-	printf("before exit\n");
-	builtin_exit(argv, &shell);
-	printf("after exit\n");
-	return (0);
+	(void)argc;
+	if (init_env(&shell, envp))
+	{
+		write(2, "init_env failed\n", 16);
+		return (1);
+	}
+	status = builtin_cd(argv, &shell);
+	printf("PWD=%s\n", get_env_val(shell.envp, "PWD"));
+	printf("OLDPWD=%s\n", get_env_val(shell.envp, "OLDPWD"));
+	free_envp(shell.envp);
+	return (status);
 }
