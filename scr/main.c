@@ -1,19 +1,36 @@
 #include "minishell.h"
 
-int	main(int argc, char **argv, char **envp)
+static char **copy_env_main(char **envp)
 {
-	t_shell	shell;
-	int		status;
+    int     i;
+    char    **env;
 
-	(void)argc;
-	if (init_env(&shell, envp))
-	{
-		write(2, "init_env failed\n", 16);
-		return (1);
-	}
-	status = builtin_cd(argv, &shell);
-	printf("PWD=%s\n", get_env_val(shell.envp, "PWD"));
-	printf("OLDPWD=%s\n", get_env_val(shell.envp, "OLDPWD"));
-	free_envp(shell.envp);
-	return (status);
+    i = 0;
+    while (envp[i])
+        i++;
+    env = malloc(sizeof(char *) * (i + 1));
+    if (!env)
+        return (NULL);
+    i = 0;
+    while (envp[i])
+    {
+        env[i] = ft_strdup(envp[i]);
+        i++;
+    }
+    env[i] = NULL;
+    return (env);
+}
+
+int main(int argc, char **argv, char **envp)
+{
+    char    **env;
+
+    (void)argc;
+    env = copy_env_main(envp);
+    if (!env)
+        return (1);
+    builtin_export(argv, &env); 
+    print_export(env);
+    free_arr(env);
+    return (0);
 }
