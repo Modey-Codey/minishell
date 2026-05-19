@@ -25,6 +25,8 @@ src/builtins/cd.c \
 src/builtins/exit.c \
 src/builtins/export.c \
 src/builtins/unset.c \
+src/builtins/builtins_utils.c \
+src/builtins/export_utils.c \
 utils/array_utils.c \
 utils/free_utils.c \
 utils/ft_itoa.c \
