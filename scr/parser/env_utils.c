@@ -45,3 +45,29 @@ int	init_env(t_shell *shell, char **sys_envp)
 	shell->envp[i] = NULL;
 	return (0);
 }
+
+char	*get_env_val(char **envp, char *key)
+{
+	int	i;
+	int	len;
+
+	i = 0;
+	len = ft_strlen(key);
+	while (envp[i])
+	{
+		if (ft_strncmp(envp[i], key, len) == 0 && envp[i][len] == '=')
+			return (envp[i] + len + 1);
+		i++;
+	}
+	return (NULL);
+}
+
+int	env_len(char **env)
+{
+	int	i;
+
+	i = 0;
+	while (env[i])
+		i++;
+	return (i);
+}
