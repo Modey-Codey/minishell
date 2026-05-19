@@ -1,21 +1,5 @@
 #include "minishell.h"
 
-char	*get_env_val(char **envp, char *key)
-{
-	int	i;
-	int	len;
-
-	i = 0;
-	len = ft_strlen(key);
-	while (envp[i])
-	{
-		if (ft_strncmp(envp[i], key, len) == 0 && envp[i][len] == '=')
-			return (envp[i] + len + 1);
-		i++;
-	}
-	return (NULL);
-}
-
 static int	update_existing_env(t_shell *shell, char *key, char *str, int len)
 {
 	int	i;
@@ -82,22 +66,10 @@ int	add_or_update_env(t_shell *shell, char *key, char *value)
 	return (0);
 }
 
-int	builtin_cd(char **argv, t_shell *shell)
+static int	update_dir_and_env(t_shell *shell, char *path)
 {
 	char	cwd[4096];
-	char	*path;
 
-	if (!argv[1])
-	{
-		path = get_env_val(shell->envp, "HOME");
-		if (!path)
-		{
-			write(2, "cd : HOME not set\n", 17);
-			return (1);
-		}
-	}
-	else
-		path = argv[1];
 	if (getcwd(cwd, sizeof(cwd)))
 		add_or_update_env(shell, "OLDPWD", cwd);
 	if (chdir(path) != 0)
@@ -108,4 +80,27 @@ int	builtin_cd(char **argv, t_shell *shell)
 	if (getcwd(cwd, sizeof(cwd)))
 		add_or_update_env(shell, "PWD", cwd);
 	return (0);
+}
+
+int	builtin_cd(char **argv, t_shell *shell)
+{
+	char	*path;
+
+	if (argv[1] && argv[2])
+	{
+		write(2, "minishell: cd: too many arguments\n", 34);
+		return (1);
+	}
+	if (!argv[1])
+	{
+		path = get_env_val(shell->envp, "HOME");
+		if (!path)
+		{
+			write (2, "cd : HOME not set\n", 17);
+			return (1);
+		}
+	}
+	else
+		path = argv[1];
+	return (update_dir_and_env(shell, path));
 }

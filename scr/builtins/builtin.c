@@ -14,7 +14,7 @@ int	is_builtin(char *cmd)
 		return (1);
 	if (!ft_strcmp(cmd, "unset"))
 		return (1);
-	if (!ft_strcmp(cmd, "env"))
+	if (!ft_strcmp(cmd, "envp"))
 		return (1);
 	if (!ft_strcmp(cmd, "exit"))
 		return (1);
@@ -31,7 +31,7 @@ int	exec_builtin(t_cmd *cmd, t_shell *shell)
 	else if (!ft_strcmp(cmd->argv[0], "pwd"))
 		return (builtin_pwd());
 	else if (!ft_strcmp(cmd->argv[0], "export"))
-		return (builtin_export(cmd->argv, shell));
+		return (builtin_export(cmd->argv, &shell->envp));
 	else if (!ft_strcmp(cmd->argv[0], "unset"))
 		return (builtin_unset(cmd->argv, shell));
 	else if (!ft_strcmp(cmd->argv[0], "env"))
