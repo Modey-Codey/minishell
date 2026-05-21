@@ -11,6 +11,7 @@
 # include <sys/types.h>
 # include <string.h>
 # include <errno.h>
+# include <limits.h>
 
 # include <readline/readline.h>
 # include <readline/history.h>
