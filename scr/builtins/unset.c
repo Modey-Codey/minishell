@@ -1,5 +1,28 @@
 #include "minishell.h"
 
+static void	print_unset_error(char *arg)
+{
+	write(2, "minishell: unset: `", 19);
+	write(2, arg, ft_strlen(arg));
+	write(2, "': not a valid identifier\n", 26);
+}
+
+static int	is_valid_unset_id(char *str)
+{
+	int	i;
+
+	if (!str || (!is_alpha(str[0]) && str[0] != '_'))
+		return (0);
+	i = 1;
+	while (str[i])
+	{
+		if (!is_alnum(str[i]) && str[i] != '_')
+			return (0);
+		i++;
+	}
+	return (1);
+}
+
 static int	match_env(char *env, char *key)
 {
 	int	i;
@@ -7,19 +30,9 @@ static int	match_env(char *env, char *key)
 	i = 0;
 	while (key[i] && env[i] && key[i] == env[i])
 		i++;
-	if (key[i] == '\0' && env[i] == '=')
+	if (key[i] == '\0' && (env[i] == '=' || env[i] == '\0'))
 		return (1);
 	return (0);
-}
-
-static void	remove_env_var(char **envp, int index)
-{
-	free(envp[index]);
-	while (envp[index])
-	{
-		envp[index] = envp[index + 1];
-		index++;
-	}
 }
 
 static void	unset_one(char *key, t_shell *shell)
@@ -31,7 +44,12 @@ static void	unset_one(char *key, t_shell *shell)
 	{
 		if (match_env(shell->envp[j], key))
 		{
-			remove_env_var(shell->envp, j);
+			free(shell->envp[j]);
+			while (shell->envp[j])
+			{
+				shell->envp[j] = shell->envp[j + 1];
+				j++;
+			}
 			break ;
 		}
 		j++;
@@ -41,17 +59,22 @@ static void	unset_one(char *key, t_shell *shell)
 int	builtin_unset(char **argv, t_shell *shell)
 {
 	int	i;
+	int	status;
 
+	status = 0;
 	if (!argv[1])
 		return (0);
 	i = 1;
 	while (argv[i])
 	{
-		if (!is_valid_identifier(argv[i]))
-			print_export_error(argv[i]);
+		if (!is_valid_unset_id(argv[i]))
+		{
+			print_unset_error(argv[i]);
+			status = 1;
+		}
 		else
 			unset_one(argv[i], shell);
 		i++;
 	}
-	return (0);
+	return (status);
 }
