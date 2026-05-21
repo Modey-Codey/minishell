@@ -1,29 +1,31 @@
 #include "minishell.h"
 
-int main(int argc, char **argv, char **envp)
+int main()
 {
-	t_shell shell;
-	int		i;
-	int		status;
+	char	*input;
+	t_token	*tokens;
+	t_cmd	*cmds;
+	t_shell	shell;
 
-	(void)argc;
-	shell.envp = copy_env(envp);
-	printf("Befor unset:\n");
-	i = 0;
-	while (shell.envp[i])
+	shell.last_exit_status = 0;
+	shell.envp = NULL;
+	while (1)
 	{
-		printf("%s\n", shell.envp[i]);
-		i++;
+		input = readline("minishell$ ");
+		if (!input)
+		{
+			printf("exit\n");
+			break ;
+		}
+		if (*input)
+			add_history(input);
+		tokens = tokenize(input);
+		cmds = parse(tokens, &shell);
+		if (cmds && cmds->argv && cmds->argv[0] && ft_strcmp(cmds->argv[0], "exit") == 0)
+			builtin_exit(cmds->argv, &shell);
+		free(input);
+		free_tokens(tokens);
+		free_cmds(cmds);
 	}
-	status = builtin_unset(argv, &shell);
-	printf("\nAfter unset:\n");
-	i = 0;
-	while (shell.envp[i])
-	{
-		printf("%s\n", shell.envp[i]);
-		i++;
-	}
-	printf("\nExit Status: %d\n", status);
-	free_envp(shell.envp);
     return (0);
 }
