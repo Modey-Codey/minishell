@@ -70,22 +70,25 @@ static long long	ft_atoll_exit(char *str)
 	return (result * sign);
 }
 
-int	builtin_exit(char **argv, t_shell *shell)
+int	builtin_exit(char **argv, t_shell *shell, int is_single_cmd)
 {
 	long long	exit_code;
 
-	printf("exit\n");
+	if (is_single_cmd)
+		write(2, "exit\n", 5);
 	if (!argv[1])
 		exit(shell->last_exit_status);
 	if (!is_numeric(argv[1]) || check_overflow(argv[1]))
 	{
-		printf("minishell: exit: %s: numeric argument required\n", argv[1]);
+		write(2, "minishell: exit: ", 17);
+		write(2, argv[1], ft_strlen(argv[1]));
+		write(2, ": numeric argument required\n", 28);
 		shell->last_exit_status = 255;
 		exit(255);
 	}
 	if (argv[2])
 	{
-		printf("minishell: exit: too many arguments\n");
+		write(2, "minishell: exit: too many arguments\n", 36);
 		shell->last_exit_status = 1;
 		return (1);
 	}

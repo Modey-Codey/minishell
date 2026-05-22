@@ -96,9 +96,14 @@ int	builtin_cd(char **argv, t_shell *shell)
 		path = get_env_val(shell->envp, "HOME");
 		if (!path)
 		{
-			write (2, "cd : HOME not set\n", 17);
+			write (2, "minishell: cd: HOME not set\n", 28);
 			return (1);
 		}
+	}
+	else if (argv[1][0] == '\0')
+	{
+		write(2, "minishell: cd: : No such file or directory\n", 43);
+		return (1);
 	}
 	else
 		path = argv[1];

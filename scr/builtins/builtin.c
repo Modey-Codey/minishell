@@ -14,14 +14,14 @@ int	is_builtin(char *cmd)
 		return (1);
 	if (!ft_strcmp(cmd, "unset"))
 		return (1);
-	if (!ft_strcmp(cmd, "envp"))
+	if (!ft_strcmp(cmd, "env"))
 		return (1);
 	if (!ft_strcmp(cmd, "exit"))
 		return (1);
 	return (0);
 }
 
-int	exec_builtin(t_cmd *cmd, t_shell *shell)
+int	exec_builtin(t_cmd *cmd, t_shell *shell, int is_single_cmd)
 {
 	if (!cmd || !cmd->argv || !cmd->argv[0])
 		return (1);
@@ -38,6 +38,6 @@ int	exec_builtin(t_cmd *cmd, t_shell *shell)
 	else if (ft_strcmp(cmd->argv[0], "env") == 0)
 		return (builtin_env(shell));
 	else if (ft_strcmp(cmd->argv[0], "exit") == 0)
-		return (builtin_exit(cmd->argv, shell));
+		return (builtin_exit(cmd->argv, shell, is_single_cmd));
 	return (1);
 }
