@@ -3,7 +3,6 @@
 
 # include <stdio.h>
 # include <stdlib.h>
-# include <stddef.h>
 # include <unistd.h>
 # include <fcntl.h>
 # include <signal.h>
@@ -83,12 +82,12 @@ void	free_envp(char **envp);
 
 // builtin
 int		is_builtin(char *cmd);
-int		exec_builtin(t_cmd *cmd, t_shell *shell);
+int		exec_builtin(t_cmd *cmd, t_shell *shell, int is_single_cmd);
 int		builtin_echo(char **argv);
 int		builtin_pwd(void);
 int		builtin_env(t_shell *shell);
 int		builtin_cd(char **argv, t_shell *shell);
-int		builtin_exit(char **argv, t_shell *shell);
+int		builtin_exit(char **argv, t_shell *shell, int is_single_cmd);
 int		builtin_export(char **argv, char ***env);
 int		builtin_unset(char **argv, t_shell *shell);
 int		add_or_update_env(t_shell *shell, char *key, char *value);
