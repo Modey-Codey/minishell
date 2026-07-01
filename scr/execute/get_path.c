@@ -1,7 +1,6 @@
-
 #include "minishell.h"
 
-static char *get_env_path(char **envp)
+static char	*get_env_path(char **envp)
 {
 	int	i;
 
@@ -12,38 +11,41 @@ static char *get_env_path(char **envp)
 			return (envp[i] + 5);
 		i++;
 	}
-	return NULL;
+	return (NULL);
 }
 
-char *get_cmd_path(char *cmd, char **envp)
+char	*search_paths(char **paths, char *cmd)
 {
-	char **paths;
-	char *path;
-	char *part_path;
+	char	*path;
+	char	*part;
 	int		i;
-	
-	if (ft_strchr(cmd, '/'))
-	{
-		if (access(cmd, X_OK) == 0)
-			return (ft_strdup(cmd));
-		return NULL;
-	}
-	if (!get_env_path(envp))
-		return NULL;
-	paths = ft_split(get_env_path(envp), ':');
+
 	i = -1;
 	while (paths && paths[++i])
 	{
-		part_path = ft_strjoin(paths[i], "/");
-		path = ft_strjoin(part_path, cmd);
-		free(part_path);
+		part = ft_strjoin(paths[i], "/");
+		path = ft_strjoin(part, cmd);
+		free(part);
 		if (access(path, X_OK) == 0)
-		{
-			free_arr(paths);
 			return (path);
-		}
 		free(path);
 	}
-	free_arr(paths);
 	return (NULL);
+}
+
+char	*get_cmd_path(char *cmd, char **envp)
+{
+	char	**paths;
+	char	*path;
+
+	if (!cmd || !cmd[0])
+		return (NULL);
+	if (ft_strchr(cmd, '/'))
+		return (ft_strdup(cmd));
+	if (!get_env_path(envp))
+		return (NULL);
+	paths = ft_split(get_env_path(envp), ':');
+	path = search_paths(paths, cmd);
+	free_arr(paths);
+	return (path);
 }
