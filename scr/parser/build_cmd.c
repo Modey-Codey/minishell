@@ -13,8 +13,13 @@ t_cmd	*new_cmd(void)
 	cmd->append = 0;
 	cmd->heredoc = 0;
 	cmd->delimiter = NULL;
-	cmd->next = NULL;
 	cmd->heredoc_quoted = 0;
+	cmd->ambiguous_redir = 0;
+	cmd->ambig_target = NULL;
+	cmd->redir_errno = 0;
+	cmd->redir_error = 0;
+	cmd->redir_error_file = NULL;
+	cmd->next = NULL;
 	return (cmd);
 }
 

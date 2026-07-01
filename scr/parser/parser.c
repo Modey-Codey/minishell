@@ -23,25 +23,28 @@ static void	add_arg(t_cmd *cmd, char *value)
 	cmd->argv = new_argv;
 }
 
-void	handle_redir(t_cmd *cmd, t_token **tok)
+void	handle_redir(t_cmd *cmd, t_token **tok, t_shell *shell)
 {
-	if ((*tok)->type == REDIR_OUT)
-		cmd->outfile = ft_strdup((*tok)->next->value);
-	else if ((*tok)->type == APPEND)
+	t_token	*next;
+	char	*expanded;
+	char	*val;
+
+	next = (*tok)->next;
+	if (cmd->redir_error)
 	{
-		cmd->outfile = ft_strdup((*tok)->next->value);
-		cmd->append = 1;
+		*tok = next;
+		return ;
 	}
-	else if ((*tok)->type == REDIR_IN)
-		cmd->infile = ft_strdup((*tok)->next->value);
-	else if ((*tok)->type == HEREDOC)
+	expanded = expand_env(next->value, shell);
+	val = remove_quotes(expanded);
+	free(expanded);
+	if (check_ambiguous(cmd, *tok, next, val))
 	{
-		cmd->delimiter = ft_strdup((*tok)->next->value);
-		cmd->heredoc = 1;
-		if ((*tok)->next->quote != NO_QUOTE)
-			cmd->heredoc_quoted = 1;
+		*tok = next;
+		return ;
 	}
-	*tok = (*tok)->next;
+	set_redir_target(cmd, *tok, next, val);
+	*tok = next;
 }
 
 static void	extract_and_add_arg(t_cmd *cmd, char *str, int start, int end)

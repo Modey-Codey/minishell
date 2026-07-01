@@ -14,7 +14,8 @@ static int	check_pipe(t_token *tok)
 	{
 		if (!tok->next || tok->next->type == PIPE)
 		{
-			printf("syntax error near unexpected token `|'\n");
+			ft_putstr_fd("minishell: syntax error \
+				near unexpected token `|'\n", 2);
 			return (0);
 		}
 	}
@@ -25,9 +26,24 @@ static int	check_redirection(t_token *tok)
 {
 	if (is_redirection(tok->type))
 	{
-		if (!tok->next || tok->next->type != WORD)
+		if (!tok->next)
 		{
-			printf("syntax error near unexpected token\n");
+			ft_putstr_fd("minishell: syntax error \
+				near unexpected token `newline'\n", 2);
+			return (0);
+		}
+		if (tok->next->type != WORD
+			|| (tok->next->quote == NO_QUOTE && (
+					ft_strcmp(tok->next->value, "(") == 0
+					|| ft_strcmp(tok->next->value, ")") == 0
+					|| ft_strcmp(tok->next->value, "&") == 0
+					|| ft_strcmp(tok->next->value, "&&") == 0
+					|| ft_strcmp(tok->next->value, "||") == 0
+					|| ft_strcmp(tok->next->value, ";") == 0)))
+		{
+			ft_putstr_fd("minishell: syntax error near unexpected token `", 2);
+			ft_putstr_fd(tok->next->value, 2);
+			ft_putstr_fd("'\n", 2);
 			return (0);
 		}
 	}
@@ -40,7 +56,7 @@ int	syntax_check(t_token *tokens)
 		return (1);
 	if (tokens->type == PIPE)
 	{
-		printf("syntax error near unexpected token `|'\n");
+		ft_putstr_fd("minishell: syntax error near unexpected token `|'\n", 2);
 		return (0);
 	}
 	while (tokens)
