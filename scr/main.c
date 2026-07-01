@@ -1,20 +1,6 @@
 #include "minishell.h"
 
-extern int g_signal;
-
-// static void	run_test_cmd(t_cmd *cmds, t_shell *shell)
-// {
-// 	if (cmds && cmds->argv && cmds->argv[0])
-// 	{
-// 		if (is_builtin(cmds->argv[0]))
-// 			shell->last_exit_status = exec_builtin(cmds, shell, 1);
-// 		else
-// 		{
-// 			printf("minishell: %s: command not found\n", cmds->argv[0]);
-// 			shell->last_exit_status = 127;
-// 		}
-// 	}
-// }
+extern int	g_signal;
 
 static void	process_input(char *line, t_shell *shell)
 {
@@ -28,6 +14,8 @@ static void	process_input(char *line, t_shell *shell)
 		return ;
 	}
 	tokens = tokenize(line);
+	if (!tokens)
+		return ;
 	if (!syntax_check(tokens))
 	{
 		shell->last_exit_status = 2;
@@ -37,7 +25,6 @@ static void	process_input(char *line, t_shell *shell)
 	cmds = parse(tokens, shell);
 	free_tokens(tokens);
 	execute(cmds, shell);
-	// run_test_cmd(cmds, shell);
 	free_cmds(cmds);
 }
 
@@ -84,7 +71,8 @@ int	main(int argc, char **argv, char **envp)
 // ตัวแปร cmds ที่โยนเข้า Execute
 // cmds->argv = อาร์เรย์ของคำสั่งและ flag (เช่น ["ls", "-l", NULL])
 
-// cmds->infile / cmds->outfile = ชื่อไฟล์ที่ต้องทำ Redirect (ถ้าไม่มีจะเป็น NULL)
+// cmds->infile / cmds->outfile = 
+// ชื่อไฟล์ที่ต้องทำ Redirect (ถ้าไม่มีจะเป็น NULL)
 
 // cmds->append = เป็น 1 ถ้าเจอ >>
 
