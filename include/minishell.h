@@ -48,6 +48,11 @@ typedef struct s_cmd
 	int				heredoc;
 	char			*delimiter;
 	int				heredoc_quoted;
+	int				ambiguous_redir;
+	char			*ambig_target;
+	int				redir_error;
+	int				redir_errno;
+	char			*redir_error_file;
 	struct s_cmd	*next;
 }	t_cmd;
 
@@ -73,7 +78,7 @@ char	*get_env_value(char *str, t_shell *shell, int *i);
 char	*expand_env(char *str, t_shell *shell);
 int		env_len(char **env);
 void	split_and_add_args(t_cmd *cmd, char *str);
-void	handle_redir(t_cmd *cmd, t_token **tok);
+void	handle_redir(t_cmd *cmd, t_token **tok, t_shell *shell);
 t_cmd	*parse(t_token *tokens, t_shell *shell);
 t_cmd	*new_cmd(void);
 void	add_cmd(t_cmd **list, t_cmd *new);
@@ -104,9 +109,10 @@ int		has_equal_sign(char *arg);
 // execute
 void	execute(t_cmd *cmds, t_shell *shell);
 int		setup_redirection(t_cmd *cmd);
-int	handle_heredoc(char *delimiter);
-char *get_cmd_path(char *cmd, char **envp);
-void execute_pipe(t_cmd *cmds, t_shell *shell);
+int		handle_heredoc(char *delimiter);
+char	*get_cmd_path(char *cmd, char **envp);
+void	execute_pipe(t_cmd *cmds, t_shell *shell);
+void	print_err(t_cmd *cmd);
 
 // signal
 void	init_signals(void);
@@ -136,5 +142,10 @@ char	*ft_itoa(int nbr);
 int		ft_strncmp(const char *s1, const char *s2, size_t n);
 int		is_single_builtin(t_cmd *cmds);
 char	*ft_strchr(char *str, char c);
+void	ft_putstr_fd(char *str, int fd);
+void	check_fd_error(t_cmd *cmd, int fd, char *val);
+void	apply_file_redir(t_cmd *cmd, char *val, int type);
+int		check_ambiguous(t_cmd *cmd, t_token *tok, t_token *next, char *val);
+void	set_redir_target(t_cmd *cmd, t_token *tok, t_token *next, char *val);
 
 #endif
