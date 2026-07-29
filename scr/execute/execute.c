@@ -1,4 +1,3 @@
-
 #include <minishell.h>
 
 void	print_err(t_cmd *cmd)
@@ -14,28 +13,28 @@ void	handle_cmd_child(t_cmd *cmd, t_shell *shell)
 {
 	char	*cmd_path;
 
+	if (setup_redirection(cmd, shell) != 0)
+		free_and_exit(shell, 1);
 	signal(SIGINT, SIG_DFL);
 	signal(SIGQUIT, SIG_DFL);
-	if (setup_redirection(cmd) != 0)
-		exit(1);
 	if (!cmd->argv || !cmd->argv[0])
-		exit(0);
+		free_and_exit(shell, 0);
 	if (is_builtin(cmd->argv[0]))
-		exit(exec_builtin(cmd, shell, 1));
+		free_and_exit(shell, exec_builtin(cmd, shell, 1));
 	cmd_path = get_cmd_path(cmd->argv[0], shell->envp);
 	if (!cmd_path)
 	{
 		ft_putstr_fd("minishell: ", 2);
 		ft_putstr_fd(cmd->argv[0], 2);
 		ft_putstr_fd(": command not found\n", 2);
-		exit(127);
+		free_and_exit(shell, 127);
 	}
 	execve(cmd_path, cmd->argv, shell->envp);
 	print_err(cmd);
 	free(cmd_path);
 	if (errno == EACCES || errno == EISDIR || errno == ENOEXEC)
-		exit(126);
-	exit(127);
+		free_and_exit(shell, 126);
+	free_and_exit(shell, 127);
 }
 
 void	handle_cmd_parent(t_shell *shell, pid_t pid)
@@ -73,23 +72,22 @@ void	execute_single_cmd(t_cmd *cmd, t_shell *shell)
 
 void	execute(t_cmd *cmds, t_shell *shell)
 {
-	int	saved_stdin;
-	int	saved_stdout;
-
 	if (!cmds)
 		return ;
 	if (is_single_builtin(cmds))
 	{
-		saved_stdin = dup(STDIN_FILENO);
-		saved_stdout = dup(STDOUT_FILENO);
-		if (setup_redirection(cmds) == 0)
+		shell->saved_stdin = dup(STDIN_FILENO);
+		shell->saved_stdout = dup(STDOUT_FILENO);
+		if (setup_redirection(cmds, shell) == 0)
 			shell->last_exit_status = exec_builtin(cmds, shell, 1);
 		else
 			shell->last_exit_status = 1;
-		dup2(saved_stdin, STDIN_FILENO);
-		dup2(saved_stdout, STDOUT_FILENO);
-		close(saved_stdin);
-		close(saved_stdout);
+		dup2(shell->saved_stdin, STDIN_FILENO);
+		dup2(shell->saved_stdout, STDOUT_FILENO);
+		close(shell->saved_stdin);
+		close(shell->saved_stdout);
+		shell->saved_stdin = -1;
+		shell->saved_stdout = -1;
 	}
 	else if (!cmds->next)
 		execute_single_cmd(cmds, shell);
