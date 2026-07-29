@@ -1,4 +1,3 @@
-
 #include "minishell.h"
 
 int	g_signal = 0;
@@ -10,6 +9,13 @@ void	sigint_handler(int sig)
 	rl_on_new_line();
 	rl_replace_line("", 0);
 	rl_redisplay();
+}
+
+void	heredoc_sigint_handler(int sig)
+{
+	g_signal = sig;
+	write(1, "\n", 1);
+	close(STDIN_FILENO);
 }
 
 void	init_signals(void)
