@@ -20,26 +20,40 @@ static int	is_numeric(char *str)
 	return (str[i] == '\0');
 }
 
-static int	is_overflowing(unsigned long long num, int sign, char c)
+static int	check_overflow(char *str)
 {
-	if (num > LLONG_MAX / 10)
-		return (1);
-	if (num == LLONG_MAX / 10)
+	unsigned long long	num;
+	unsigned long long	limit;
+	int					sign;
+
+	num = 0;
+	sign = 1;
+	while (*str == ' ' || (*str >= '\t' && *str <= '\r'))
+		str++;
+	if (*str == '-' || *str == '+')
 	{
-		if (sign == 1 && (c - '0') > 7)
+		if (*str == '-')
+			sign = -1;
+		str++;
+	}
+	limit = 9223372036854775807ULL + (sign == -1);
+	while (is_digit(*str))
+	{
+		if (num > limit / 10
+			|| (num == limit / 10
+				&& (unsigned long long)(*str - '0') > limit % 10))
 			return (1);
-		if (sign == -1 && (c - '0') > 8)
-			return (1);
+		num = num * 10 + (*str++ - '0');
 	}
 	return (0);
 }
 
-static int	check_overflow(char *str)
+static long long	ft_atoll_exit(char *str)
 {
-	unsigned long long	num;
+	unsigned long long	result;
 	int					sign;
 
-	num = 0;
+	result = 0;
 	sign = 1;
 	while (*str == ' ' || (*str >= '\t' && *str <= '\r'))
 		str++;
@@ -51,36 +65,16 @@ static int	check_overflow(char *str)
 	}
 	while (is_digit(*str))
 	{
-		if (is_overflowing(num, sign, *str))
-			return (1);
-		num = num * 10 + (*str++ - '0');
+		result = result * 10 + (*str - '0');
+		str++;
 	}
-	return (0);
-}
-
-static long long	ft_atoll_exit(char *str)
-{
-	long long	result;
-	int			sign;
-	int			i;
-
-	result = 0;
-	sign = 1;
-	i = 0;
-	while (str[i] == ' ' || (str[i] >= '\t' && str[i] <= '\r'))
-		i++;
-	if (str[i] == '+' || str[i] == '-')
+	if (sign == -1)
 	{
-		if (str[i] == '-')
-			sign = -1;
-		i++;
+		if (result == 9223372036854775808ULL)
+			return (LLONG_MIN);
+		return (-((long long)result));
 	}
-	while (str[i])
-	{
-		result = result * 10 + (str[i] - '0');
-		i++;
-	}
-	return (result * sign);
+	return ((long long)result);
 }
 
 int	builtin_exit(char **argv, t_shell *shell, int is_single_cmd)
@@ -97,12 +91,11 @@ int	builtin_exit(char **argv, t_shell *shell, int is_single_cmd)
 		write(2, argv[1], ft_strlen(argv[1]));
 		write(2, ": numeric argument required\n", 28);
 		free_and_exit(shell, 2);
-		exit(2);
 	}
 	if (argv[2])
 	{
 		write(2, "minishell: exit: too many arguments\n", 36);
-		free_and_exit(shell, 1);
+		shell->last_exit_status = 1;
 		return (1);
 	}
 	exit_code = ft_atoll_exit(argv[1]);
